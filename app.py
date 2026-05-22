@@ -388,7 +388,7 @@ body {
                 </div>
                 
                 <div class="lich-chat-bubble" onclick="openLichChat()">
-                    <span>Merhaba Ölümlü! Benimle konuşmak için dokun... 🔮</span>
+                    <span>Merhaba! Benimle konuşmak için dokun... 🔮</span>
                     <div class="bubble-arrow"></div>
                 </div>
             </div>
@@ -429,7 +429,7 @@ body {
 
         <section id="page-oyunlar" class="app-page">
             <div class="page-header">
-                <h2><i class="fa-solid fa-gamepad"></i> OYUNLAR SOKAĞI</h2>
+                <h2><i class="fa-solid fa-gamepad"></i> OYUNLAR </h2>
             </div>
             
             <div class="games-grid">
