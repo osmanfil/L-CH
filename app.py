@@ -564,12 +564,12 @@ body {
 
         <section id="page-destek" class="app-page">
             <div class="page-header">
-                <h2>👑 Yapımcı Osman</h2>
+                <h2>👑 Osman</h2>
             </div>
             <div class="support-container">
                 <div class="support-card">
                     <h2>Lich Premium Satın Al</h2>
-                    <p class="support-desc">Lich yapay zekayı ve yapımcı Osman'ı desteklemek için</p>
+                    <p class="support-desc">Lich yapay zekayı desteklemek için</p>
                     <div class="support-options">
                         <button class="support-btn">💫 Galaksi 100tl</button>
                         
@@ -658,8 +658,8 @@ function setTheme(themeClass, themeName, element) {
 }
 
 
-// ================= API KEY YÖNETİM MOTORU =================
-let GEMINI_API_KEY = localStorage.getItem('lich_api_key') || "";
+// ==================== API KEY YÖNETİM MOTORU ====================
+let GEMINI_API_KEY = "gen-lang-client-0377500333"; // Not: Eğer anahtarın devamı varsa tırnağı kapatmadan önce ekle.
 
 window.addEventListener('DOMContentLoaded', () => {
     updateApiUIState();
