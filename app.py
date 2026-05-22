@@ -613,7 +613,7 @@ body {
 
 
     <script>
-        // ================= UYGULAMA SAYFA YÖNETİMİ =================
+      // ================= UYGULAMA SAYFA YÖNETİMİ =================
 function switchPage(pageId, targetBtn = null) {
     // Tüm ana ve alt sayfaları gizle
     document.querySelectorAll('.app-page').forEach(page => {
@@ -661,7 +661,7 @@ function setTheme(themeClass, themeName, element) {
 // ==================== API KEY YÖNETİM MOTORU ====================
 let GEMINI_API_KEY = ""; 
 
-// KESİN ÇÖZÜM BURASI: Sayfa açıldığında hafızadaki anahtarı yükle!
+// Sayfa açıldığında hafızadaki anahtarı otomatik yükler
 window.addEventListener('DOMContentLoaded', () => {
     const savedKey = localStorage.getItem('lich_api_key');
     if (savedKey) {
@@ -748,7 +748,6 @@ async function fetchGeminiResponse(userPrompt) {
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     
-    // Düzenleme: Sistem talimatı ile kullanıcı mesajı arasına net bir boşluk eklendi
     const requestBody = {
         contents: [{
             parts: [{
@@ -1033,7 +1032,7 @@ function openLichChat() {
         const inputKey = document.getElementById('api-key-input');
         if (inputKey) inputKey.focus();
     }
-}
+} // <- İŞTE KİLİDİ AÇAN VE BUTONLARI ÇALIŞTIRAN EKSİK PARANTEZ BURAYA EKLENDİ!
     </script>
 </body>
 </html>
