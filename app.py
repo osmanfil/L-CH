@@ -659,7 +659,7 @@ function setTheme(themeClass, themeName, element) {
 
 
 // ==================== API KEY YÖNETİM MOTORU ====================
-let GEMINI_API_KEY = "gen-lang-client-0377500333"; // Not: Eğer anahtarın devamı varsa tırnağı kapatmadan önce ekle.
+let GEMINI_API_KEY = "AIzaSyBziQ7zPXmcdVdIkECmXtZOgPszIGrZbG8"; // Not: Eğer anahtarın devamı varsa tırnağı kapatmadan önce ekle.
 
 window.addEventListener('DOMContentLoaded', () => {
     updateApiUIState();
