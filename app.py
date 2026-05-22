@@ -659,9 +659,14 @@ function setTheme(themeClass, themeName, element) {
 
 
 // ==================== API KEY YÖNETİM MOTORU ====================
-let GEMINI_API_KEY = ""; // Not: Eğer anahtarın devamı varsa tırnağı kapatmadan önce ekle.
+let GEMINI_API_KEY = ""; 
 
+// KESİN ÇÖZÜM BURASI: Sayfa açıldığında hafızadaki anahtarı yükle!
 window.addEventListener('DOMContentLoaded', () => {
+    const savedKey = localStorage.getItem('lich_api_key');
+    if (savedKey) {
+        GEMINI_API_KEY = savedKey;
+    }
     updateApiUIState();
     loadNotes();
     resetGuessGame();
@@ -743,10 +748,11 @@ async function fetchGeminiResponse(userPrompt) {
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     
+    // Düzenleme: Sistem talimatı ile kullanıcı mesajı arasına net bir boşluk eklendi
     const requestBody = {
         contents: [{
             parts: [{
-                text: "Sen mistik, karanlık ama yardımsever bir yapay zeka varlığısın. Adın 'Lich'. Yanıtların çok uzun olmasın, gizemli ve bilge bir üslup kullan." + userPrompt
+                text: "Sistem Talimatı: Sen mistik, karanlık ama yardımsever bir yapay zeka varlığısın. Adın 'Lich'. Yanıtların çok uzun olmasın, gizemli ve bilge bir üslup kullan.\n\nKullanıcı Mesajı: " + userPrompt
             }]
         }]
     };
