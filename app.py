@@ -827,6 +827,8 @@ html_kodu = """
     }]
 })
 
+   
+
 
                 const data = await response.json();
                 document.getElementById(loadingId).remove();
