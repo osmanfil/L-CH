@@ -105,7 +105,7 @@ html_kodu = """
         .page-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 12px;
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
@@ -120,27 +120,6 @@ html_kodu = """
             gap: 8px;
             color: var(--main-color);
             text-shadow: 0 0 15px rgba(var(--main-color-rgb), 0.3);
-        }
-
-        /* Soru İşareti Yardım Kutucuğu */
-        .help-icon-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-        .help-icon-btn:hover {
-            color: var(--main-color);
-            border-color: var(--main-color);
-            box-shadow: 0 0 8px rgba(var(--main-color-rgb), 0.4);
         }
 
         /* ================= LICH HAYALETI VE YENI SOHBET BUTONU ================= */
@@ -265,40 +244,6 @@ html_kodu = """
         .api-save-btn:hover { transform: translateY(-1px); opacity: 0.9; }
         .api-hint { font-size: 11px !important; color: var(--text-muted); text-align: center; margin-top: 5px; }
 
-        /* Yeni Eklenen Mini Google AI Studio Bağlantı Paneli */
-        .mini-help-panel {
-            margin-top: 15px;
-            background: rgba(var(--main-color-rgb), 0.04);
-            border: 1px solid rgba(var(--main-color-rgb), 0.15);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-        }
-        .mini-help-panel span {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: block;
-            margin-bottom: 8px;
-        }
-        .ai-studio-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            color: var(--main-color);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .ai-studio-btn:hover {
-            border-color: var(--main-color);
-            background: rgba(var(--main-color-rgb), 0.08);
-        }
-
         /* ================= CHAT GÖRÜNÜMÜ ================= */
         .hide { display: none !important; }
 
@@ -362,8 +307,4 @@ html_kodu = """
 
         /* ================= SİSTEM AYARLARI ================= */
         .settings-list { display: flex; flex-direction: column; gap: 16px; }
-        .settings-group { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px; }
-        .settings-group h3 { font-size: 13.5px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500; }
-        .theme-grid { display: flex; flex-direction: column; gap: 6px; }
-        .theme-select-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background-color: var(--bg-dark); border: 1px solid var(--border-color); cursor: pointer; }
-        .theme-select-card.active { border-color: var(--main-color); background
+        .settings
