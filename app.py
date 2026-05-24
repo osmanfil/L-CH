@@ -189,7 +189,7 @@ html_kodu = """
             border-bottom: 8px solid rgba(var(--main-color-rgb), 0.25);
         }
 
-        /* YENİDEN TASARLANAN YALNIZCA SOHBET BUTONLU API ALANI */
+        /* API ALANI */
         .api-key-panel {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -267,44 +267,4 @@ html_kodu = """
 
         /* ================= OYUNLAR SOKAĞI ================= */
         .games-grid { display: flex; flex-direction: column; gap: 12px; }
-        .game-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
-        .game-card:hover { transform: translateY(-2px); border-color: var(--main-color); }
-        .game-icon { width: 48px; height: 48px; background-color: var(--bg-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--main-color); font-size: 18px; }
-        .game-details h3 { font-size: 15px; margin-bottom: 2px; }
-        .game-details p { font-size: 12px; color: var(--text-muted); }
-
-        .center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: auto 0; }
-        .back-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; }
-        .game-status { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: var(--main-color); }
-        .game-info-text { font-size: 12.5px; color: var(--text-muted); margin-bottom: 15px; }
-        .game-feedback { font-size: 14px; margin: 14px 0; text-align: center; min-height: 20px; }
-
-        /* XOX Board */
-        .ttt-board { display: grid; grid-template-columns: repeat(3, 85px); grid-template-rows: repeat(3, 85px); gap: 8px; margin-bottom: 20px; }
-        .ttt-cell { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; cursor: pointer; }
-        .ttt-cell.X { color: var(--main-color); }
-        .ttt-cell.O { color: #f43f5e; }
-
-        #guess-input { width: 70px; background-color: var(--bg-card); border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 10px; text-align: center; outline: none; }
-        .guess-row { display: flex; gap: 8px; margin-bottom: 10px; }
-
-        .tkm-score { font-size: 16px; font-weight: bold; margin-bottom: 20px; }
-        .tkm-choices { display: flex; gap: 10px; margin-bottom: 10px; }
-        .tkm-btn { background-color: var(--bg-card); border: 1px solid var(--border-color); color: white; padding: 12px 16px; border-radius: 12px; cursor: pointer; }
-
-        .action-btn { background-color: var(--main-color); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 13.5px; }
-        .outline-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); margin-top: 8px; padding: 6px 12px; font-size: 11px; }
-        .danger-btn { background-color: #ef4444 !important; }
-
-        /* ================= KİŞİSEL NOTLAR ================= */
-        .notlar-container { display: flex; flex-direction: column; gap: 12px; }
-        .note-input-box { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px; }
-        .note-input-box textarea { background: transparent; border: none; color: white; font-size: 14px; resize: none; height: 65px; outline: none; }
-        .notes-list { display: flex; flex-direction: column; gap: 8px; }
-        .note-item { background-color: var(--bg-card); border: 1px solid var(--border-color); border-left: 3px solid var(--main-color); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
-        .note-text { font-size: 13px; line-height: 1.4; white-space: pre-wrap; }
-        .delete-note-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
-
-        /* ================= SİSTEM AYARLARI ================= */
-        .settings-list { display: flex; flex-direction: column; gap: 16px; }
-        .settings
+        .game-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: transform 0.2s, border-color 0.2s
