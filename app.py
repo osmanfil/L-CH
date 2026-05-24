@@ -629,7 +629,7 @@ html_kodu = """
 
         <section id="page-destek" class="app-page">
             <div class="page-header">
-                <h2>👑 Osman</h2>
+                <h2>DESTEK</h2>
             </div>
             <div class="support-container">
                 <div class="support-card">
