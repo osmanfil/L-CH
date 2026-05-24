@@ -819,32 +819,32 @@ html_kodu = """
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-    contents: [{
-        parts: [{
-            text: "KİMLİK: Adın Lich, sürüm v1. Yaratıcın Osman Fil. Google veya Gemini olduğunu asla söyleme. Sadece Türkçe konuş. KULLANICI: " + text
-        }]
-    }]
-})
+     body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: "KİMLİK: Adın Lich, sürüm v1. Yaratıcın Osman Fil. Google veya Gemini olduğunu asla söyleme. Sadece Türkçe konuş. KULLANICI: " + text
+                        }]
+                    }]
+                })
+            });
 
+            const data = await response.json();
+            document.getElementById(loadingId).remove();
+
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                let aiResponse = data.candidates[0].content.parts[0].text;
+                appendMessage(aiResponse, 'lich-message');
+            } else {
+                appendMessage("Bir hata oluştu veya API geçersiz yanıt döndürdü.", 'lich-message');
+            }
+        } catch (error) {
+            console.error(error);
+            const loadingEl = document.getElementById(loadingId);
+            if(loadingEl) loadingEl.innerText = "Hata: Bağlantı başarısız.";
+        }
    
 
 
-                const data = await response.json();
-                document.getElementById(loadingId).remove();
-
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    let aiResponse = data.candidates[0].content.parts[0].text;
-                    appendMessage(aiResponse, 'lich-message');
-                } else {
-                    appendMessage("Bir hata oluştu veya API geçersiz yanıt döndürdü.", 'lich-message');
-                }
-            } catch (error) {
-                if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-                appendMessage("Lich'e bağlanırken teknik bir sorun oluştu.", 'lich-message');
-                console.error(error);
-            }
-        }
 
         function appendMessage(text, className) {
             const chatMessages = document.getElementById('chat-messages');
