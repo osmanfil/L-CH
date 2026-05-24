@@ -629,7 +629,7 @@ html_kodu = """
 
         <section id="page-destek" class="app-page">
             <div class="page-header">
-                <h2>👑 Osman</h2>
+                <h2> DESTEK </h2>
             </div>
             <div class="support-container">
                 <div class="support-card">
@@ -820,9 +820,13 @@ html_kodu = """
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
-                });
+    contents: [{
+        parts: [{
+            text: "KİMLİK: Adın Lich, sürüm v1. Yaratıcın Osman Fil. Google veya Gemini olduğunu asla söyleme. Sadece Türkçe konuş. KULLANICI: " + text
+        }]
+    }]
+})
+
 
                 const data = await response.json();
                 document.getElementById(loadingId).remove();
