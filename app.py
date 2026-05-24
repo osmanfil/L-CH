@@ -14,7 +14,7 @@ st.set_page_config(
 # HTML'den gelen verileri yakalamak ve Gemini API'sine istek atmak için sorgu parametrelerini kullanıyoruz.
 query_params = st.query_params
 
-if "action" in query_params and query_params["action"] == "gemini_request":
+if query_params.get("action") == "gemini_request":
     user_message = query_params.get("message", "")
     api_key = query_params.get("key", "")
     
@@ -45,28 +45,23 @@ if "action" in query_params and query_params["action"] == "gemini_request":
     st.stop()
 
 
-# Bilgisayarındaki tüm kodları bu tek HTML yapısının içine yerleştiriyoruz
-html_kodu = """
+# ================= FRONTEND HTML / CSS / JAVASCRIPT BLOKLARI =================
+html_kodu = """\
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    </html>
-"""  # <--- HTML kodunun bittiği en alt satıra bu üçlü tırnağı eklemelisin!
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lich AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ================= TEMA VE RENK DEĞİŞKENLERİ ================= */
+        /* CSS Değişkenleri ve Temel Tanımlar */
         :root {
-            --bg-dark: #07050a;
-            --bg-card: #0f0b18;
-            --bg-card-header: #161024;
-            --text-main: #ffffff;
-            --text-muted: #8e82a3;
-            --border-color: #211834;
-            
-            /* Varsayılan Tema (Lich - Mor) */
+            --bg-dark: #09090b;
+            --bg-card: #18181b;
+            --border-color: #27272a;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
             --main-color: #a855f7;
             --main-color-rgb: 168, 85, 247;
         }
@@ -179,7 +174,7 @@ html_kodu = """
             transition: transform 0.3s ease, filter 0.3s ease;
         }
 
-        .lich-ghost ... {
+        .lich-ghost path {
             fill: rgba(var(--main-color-rgb), 0.12);
             stroke: var(--main-color);
             stroke-width: 2.5;
@@ -195,8 +190,9 @@ html_kodu = """
             filter: drop-shadow(0 0 25px rgba(var(--main-color-rgb), 0.8));
         }
 
-        .lich-ghost.spook-action {
-            animation: ghostSpook 0.5s ease-in-out;
+        @keyframes ghostFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         /* Balon Efekti */
@@ -214,8 +210,8 @@ html_kodu = """
             cursor: pointer;
             margin-top: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            animation: bubblePulse 2.5s infinite ease-in-out;
             transition: transform 0.2s;
+            position: relative;
         }
         .lich-chat-bubble:hover { transform: translateY(-2px); background: rgba(var(--main-color-rgb), 0.15); }
 
@@ -312,7 +308,7 @@ html_kodu = """
         .game-details p { font-size: 12px; color: var(--text-muted); }
 
         .center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: auto 0; }
-        .back-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; }
+        .back-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; margin-bottom: 10px; align-self: flex-start; }
         .game-status { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: var(--main-color); }
         .game-info-text { font-size: 12.5px; color: var(--text-muted); margin-bottom: 15px; }
         .game-feedback { font-size: 14px; margin: 14px 0; text-align: center; min-height: 20px; }
@@ -331,4 +327,451 @@ html_kodu = """
         .tkm-btn { background-color: var(--bg-card); border: 1px solid var(--border-color); color: white; padding: 12px 16px; border-radius: 12px; cursor: pointer; border-style: solid; border-width: 1px; transition: border-color 0.2s; }
         .tkm-btn:hover { border-color: var(--main-color); }
 
+        /* Alt Navigasyon Barı */
+        .bottom-nav {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 70px;
+            background-color: var(--bg-card); border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-around; align-items: center; z-index: 10;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--text-muted); cursor: pointer; font-size: 11px; font-weight: 500;
+            transition: color 0.2s; width: 60px;
+        }
+        .nav-item i { font-size: 20px; }
+        .nav-item.active { color: var(--main-color); }
+
         .action-btn { background-color: var(--main-color); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 13.5px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="page-home" class="app-page active">
+            <div class="page-header">
+                <h2><i class="fas fa-ghost"></i> Lich AI</h2>
+            </div>
+            
+            <div class="lich-ghost-container">
+                <svg class="lich-ghost" viewBox="0 0 100 120" id="main-lich-ghost">
+                    <path d="M20,60 C20,30 80,30 80,60 C80,80 90,95 80,110 C70,100 60,110 50,100 C40,110 30,100 20,110 C10,95 20,80 20,60 Z"/>
+                    <circle cx="40" cy="55" r="5" class="eye-glow"/>
+                    <circle cx="60" cy="55" r="5" class="eye-glow"/>
+                </svg>
+                
+                <div class="lich-chat-bubble" id="ghost-bubble">
+                    <div class="bubble-arrow"></div>
+                    <span>Merhaba fani! Ben Lich. Bilgelik arıyorsan API anahtarını gir ve benimle sohbete başla!</span>
+                </div>
+            </div>
+
+            <div class="api-key-panel">
+                <div class="api-panel-content">
+                    <p>Lich AI'ın kadim gücünü uyandırmak için Gemini API anahtarını girmelisin.</p>
+                    <div class="api-input-row">
+                        <input type="password" id="api-key-input" class="api-input" placeholder="AIzaSy...">
+                        <button id="save-api-btn" class="api-save-btn"><i class="fas fa-key"></i> Anahtarı Bağla</button>
+                    </div>
+                    <p class="api-hint">Anahtarınız tamamen tarayıcınızda şifreli olarak saklanır.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-chat" class="app-page">
+            <div class="page-header">
+                <h2><i class="fas fa-comment-alt"></i> Ruhani Sohbet</h2>
+            </div>
+            <div class="chat-panel">
+                <div class="chat-messages" id="chat-box">
+                    <div class="chat-placeholder" id="chat-blank">
+                        <i class="fas fa-comments big-icon"></i>
+                        <h3>Fısıltılar Odası</h3>
+                        <p>Henüz bir iletişim kurulmadı. İlk mesajı sen gönder!</p>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <button class="clear-chat-btn" id="btn-clear" title="Geçmişi Sil"><i class="fas fa-trash-alt"></i></button>
+                    <input type="text" id="user-input" placeholder="Lich'e bir soru fısılda...">
+                    <button class="send-btn" id="btn-send"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-games" class="app-page">
+            <div class="page-header">
+                <h2><i class="fas fa-gamepad"></i> Oyunlar Sokağı</h2>
+            </div>
+            
+            <div class="games-grid" id="games-menu">
+                <div class="game-card" onclick="openGame('xox')">
+                    <div class="game-icon"><i class="fas fa-times"></i></div>
+                    <div class="game-details">
+                        <h3>Kadim XOX (Tic-Tac-Toe)</h3>
+                        <p>Lich'e karşı zeka savaşı ver.</p>
+                    </div>
+                </div>
+                <div class="game-card" onclick="openGame('guess')">
+                    <div class="game-icon"><i class="fas fa-dice"></i></div>
+                    <div class="game-details">
+                        <h3>Gizemli Sayı</h3>
+                        <p>1-100 arasındaki tılsımlı sayıyı bul.</p>
+                    </div>
+                </div>
+                <div class="game-card" onclick="openGame('tkm')">
+                    <div class="game-icon"><i class="fas fa-hand-rock"></i></div>
+                    <div class="game-details">
+                        <h3>Rün Savaşı (TKM)</h3>
+                        <p>Taş, Kağıt, Makas ritüelini tamamla.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-xox" class="center-content hide">
+                <button class="back-btn" onclick="closeGame()"><i class="fas fa-arrow-left"></i> Geri Dön</button>
+                <div class="game-status" id="ttt-status">Senin Sıran (X)</div>
+                <div class="ttt-board">
+                    <div class="ttt-cell" onclick="playTTT(0)"></div>
+                    <div class="ttt-cell" onclick="playTTT(1)"></div>
+                    <div class="ttt-cell" onclick="playTTT(2)"></div>
+                    <div class="ttt-cell" onclick="playTTT(3)"></div>
+                    <div class="ttt-cell" onclick="playTTT(4)"></div>
+                    <div class="ttt-cell" onclick="playTTT(5)"></div>
+                    <div class="ttt-cell" onclick="playTTT(6)"></div>
+                    <div class="ttt-cell" onclick="playTTT(7)"></div>
+                    <div class="ttt-cell" onclick="playTTT(8)"></div>
+                </div>
+                <button class="action-btn" onclick="resetTTT()">Yeniden Başla</button>
+            </div>
+
+            <div id="game-guess" class="center-content hide">
+                <button class="back-btn" onclick="closeGame()"><i class="fas fa-arrow-left"></i> Geri Dön</button>
+                <div class="game-status">Zihin Okuma</div>
+                <p class="game-info-text">1 ile 100 arasında bir sayı tuttum, tahmin et fani!</p>
+                <div class="guess-row">
+                    <input type="number" id="guess-input" min="1" max="100">
+                    <button class="action-btn" onclick="checkGuess()">Tahmin Et</button>
+                </div>
+                <div class="game-feedback" id="guess-feedback"></div>
+                <button class="action-btn hide" id="guess-reset" onclick="resetGuess()">Yeniden Başla</button>
+            </div>
+
+            <div id="game-tkm" class="center-content hide">
+                <button class="back-btn" onclick="closeGame()"><i class="fas fa-arrow-left"></i> Geri Dön</button>
+                <div class="game-status">Rün Seçimi</div>
+                <div class="tkm-score" id="tkm-score">Skor: Oyuncu 0 - 0 Lich</div>
+                <div class="tkm-choices">
+                    <button class="tkm-btn" onclick="playTKM('Taş')">💎 Taş</button>
+                    <button class="tkm-btn" onclick="playTKM('Kağıt')">📜 Kağıt</button>
+                    <button class="tkm-btn" onclick="playTKM('Makas')">✂️ Makas</button>
+                </div>
+                <div class="game-feedback" id="tkm-feedback">İlk hamleni seç!</div>
+            </div>
+        </div>
+
+        <div id="page-settings" class="app-page">
+            <div class="page-header">
+                <h2><i class="fas fa-sliders-h"></i> Boyutsal Ayarlar</h2>
+            </div>
+            <div style="background-color: var(--bg-card); padding: 20px; border-radius: 20px; border: 1px solid var(--border-color);">
+                <p style="font-size: 14px; margin-bottom: 15px; color: var(--text-muted);"><i class="fas fa-palette"></i> Arayüz Teması</p>
+                <div style="display: flex; gap: 12px; justify-content: center; padding: 10px 0;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" class="color-lich" onclick="changeTheme('lich')"></div>
+                    <div style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" class="color-lev" onclick="changeTheme('lev')"></div>
+                    <div style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" class="color-okyanus" onclick="changeTheme('okyanus')"></div>
+                    <div style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" class="color-orman" onclick="changeTheme('orman')"></div>
+                    <div style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" class="color-kozmik" onclick="changeTheme('kozmik')"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchPage('home')">
+                <i class="fas fa-home"></i>
+                <span>Giriş</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('chat')">
+                <i class="fas fa-comment-dots"></i>
+                <span>Sohbet</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('games')">
+                <i class="fas fa-gamepad"></i>
+                <span>Oyunlar</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('settings')">
+                <i class="fas fa-cog"></i>
+                <span>Ayarlar</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sayfa Değiştirme Sistemi
+        function switchPage(pageId) {
+            document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            // Aktif navbar butonunu boyama
+            const navItems = document.querySelectorAll('.nav-item');
+            if(pageId === 'home') navItems[0].classList.add('active');
+            if(pageId === 'chat') navItems[1].classList.add('active');
+            if(pageId === 'games') navItems[2].classList.add('active');
+            if(pageId === 'settings') navItems[3].classList.add('active');
+        }
+
+        // Dinamik Tema Değişimi
+        function changeTheme(themeName) {
+            document.body.className = ''; 
+            if(themeName !== 'lich') {
+                document.body.classList.add('theme-' + themeName);
+            }
+            localStorage.setItem('lich_theme', themeName);
+        }
+
+        // API Anahtarı Saklama ve Yönetimi
+        const apiInput = document.getElementById('api-key-input');
+        const saveApiBtn = document.getElementById('save-api-btn');
+        const ghostBubble = document.getElementById('ghost-bubble').querySelector('span');
+
+        if(localStorage.getItem('gemini_api_key')) {
+            apiInput.value = localStorage.getItem('gemini_api_key');
+            ghostBubble.innerText = "Karanlık rünler bağlı! Artık 'Sohbet' sekmesinden bana emir verebilirsin fani.";
+        }
+
+        saveApiBtn.addEventListener('click', () => {
+            const key = apiInput.value.trim();
+            if(key) {
+                localStorage.setItem('gemini_api_key', key);
+                ghostBubble.innerText = "Ritüel başarılı. Bağlantı kuruldu, artık seninle konuşabilirim.";
+                alert("API Anahtarı başarıyla yerel hafızaya kaydedildi!");
+            } else {
+                localStorage.removeItem('gemini_api_key');
+                ghostBubble.innerText = "Anahtarı sildin... Gücüm tükendi.";
+            }
+        });
+
+        // Tema yükleme
+        if(localStorage.getItem('lich_theme')) {
+            changeTheme(localStorage.getItem('lich_theme'));
+        }
+
+        // ================= GEMINI SOHBET ENTEGRASYONU =================
+        const chatBox = document.getElementById('chat-box');
+        const chatBlank = document.getElementById('chat-blank');
+        const userInput = document.getElementById('user-input');
+        const btnSend = document.getElementById('btn-send');
+        const btnClear = document.getElementById('btn-clear');
+
+        // Sohbet Geçmişini Yükleme
+        let chatHistory = JSON.parse(localStorage.getItem('lich_chat_history')) || [];
+        
+        function renderChat() {
+            if(chatHistory.length > 0) {
+                chatBlank.classList.add('hide');
+                chatBox.innerHTML = '';
+                chatHistory.forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `message ${msg.role}-message`;
+                    msgDiv.innerText = msg.text;
+                    chatBox.appendChild(msgDiv);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                chatBox.innerHTML = '';
+                chatBox.appendChild(chatBlank);
+                chatBlank.classList.remove('hide');
+            }
+        }
+        renderChat();
+
+        // Mesaj Gönderme İşlemi (Streamlit query_params Köprüsü)
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            const apiKey = localStorage.getItem('gemini_api_key');
+
+            if(!apiKey) {
+                alert("Önce Giriş sayfasından geçerli bir Gemini API anahtarı eklemelisin!");
+                return;
+            }
+            if(!text) return;
+
+            // Kullanıcı mesajını ekrana ve hafızaya ekle
+            chatHistory.push({ role: 'user', text: text });
+            userInput.value = '';
+            renderChat();
+
+            // Yükleniyor animasyonu ekle
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message loading-message';
+            loadingDiv.id = 'lich-loading';
+            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Lich düşünüyor...';
+            chatBox.appendChild(loadingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // Streamlit Arkaplanına HTTP isteği gönderiyoruz
+                const baseUrl = window.parent.location.origin + window.parent.location.pathname;
+                const requestUrl = `?action=gemini_request&key=${encodeURIComponent(apiKey)}&message=${encodeURIComponent(text)}`;
+                
+                const response = await fetch(requestUrl);
+                const responseText = await response.text();
+
+                // Yükleniyor yazısını kaldır
+                document.getElementById('lich-loading').remove();
+
+                if (responseText.includes("|||SUCCESS|||")) {
+                    const cleanResponse = responseText.split("|||SUCCESS|||")[1].split("<")[0].trim();
+                    chatHistory.push({ role: 'lich', text: cleanResponse });
+                } else if (responseText.includes("|||ERROR|||")) {
+                    const errResponse = responseText.split("|||ERROR|||")[1].split("<")[0].trim();
+                    chatHistory.push({ role: 'lich', text: `Hata: ${errResponse}` });
+                } else {
+                    chatHistory.push({ role: 'lich', text: "Ruhani bağ koptu, bilinmeyen bir hata oluştu." });
+                }
+            } catch (err) {
+                if(document.getElementById('lich-loading')) document.getElementById('lich-loading').remove();
+                chatHistory.push({ role: 'lich', text: "Bağlantı hatası: Sunucuya fısıltın ulaşmadı." });
+            }
+
+            localStorage.setItem('lich_chat_history', JSON.stringify(chatHistory));
+            renderChat();
+        }
+
+        btnSend.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+        btnClear.addEventListener('click', () => {
+            if(confirm("Tüm fısıltıları ve hafızayı silmek istediğine emin misin?")) {
+                chatHistory = [];
+                localStorage.removeItem('lich_chat_history');
+                renderChat();
+            }
+        });
+
+        // ================= OYUNLAR SOKAĞI LOGIC =================
+        function openGame(gameName) {
+            document.getElementById('games-menu').classList.add('hide');
+            document.getElementById('game-' + gameName).classList.remove('hide');
+            if(gameName === 'guess') resetGuess();
+            if(gameName === 'xox') resetTTT();
+        }
+
+        function closeGame() {
+            document.getElementById('game-xox').classList.add('hide');
+            document.getElementById('game-guess').classList.add('hide');
+            document.getElementById('game-tkm').classList.add('hide');
+            document.getElementById('games-menu').classList.remove('hide');
+        }
+
+        // --- SAYI TAHMİN OYUNU ---
+        let targetNumber;
+        function resetGuess() {
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            document.getElementById('guess-feedback').innerText = '';
+            document.getElementById('guess-input').value = '';
+            document.getElementById('guess-reset').classList.add('hide');
+        }
+        function checkGuess() {
+            const val = parseInt(document.getElementById('guess-input').value);
+            const fb = document.getElementById('guess-feedback');
+            if(isNaN(val)) return;
+            if(val === targetNumber) {
+                fb.innerText = "🔮 İnanılmaz! Doğru tahmin, zihnimi okudun!";
+                document.getElementById('guess-reset').classList.remove('hide');
+            } else if(val < targetNumber) {
+                fb.innerText = "Daha büyük bir sayı fısılda...";
+            } else {
+                fb.innerText = "Daha küçük bir sayı fısılda...";
+            }
+        }
+
+        // --- TKM OYUNU ---
+        let pScore = 0, lScore = 0;
+        function playTKM(pChoice) {
+            const choices = ['Taş', 'Kağıt', 'Makas'];
+            const lChoice = choices[Math.floor(Math.random() * 3)];
+            const fb = document.getElementById('tkm-feedback');
+            let res = "";
+            
+            if(pChoice === lChoice) res = "Berabere! İki rün de birbirini sönümledi.";
+            else if(
+                (pChoice === 'Taş' && lChoice === 'Makas') ||
+                (pChoice === 'Kağıt' && lChoice === 'Taş') ||
+                (pChoice === 'Makas' && lChoice === 'Kağıt')
+            ) {
+                res = `Kazandın! Senin ${pChoice} rünün, Lich'in ${lChoice} rününü parçaladı.`;
+                pScore++;
+            } else {
+                res = `Lich Kazandı! Onun ${lChoice} rünü, senin ${pChoice} rününü yuttu.`;
+                lScore++;
+            }
+            fb.innerText = res;
+            document.getElementById('tkm-score').innerText = `Skor: Oyuncu ${pScore} - ${lScore} Lich`;
+        }
+
+        // --- XOX OYUNU ---
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let isGameActive = true;
+        function playTTT(cellIndex) {
+            if(board[cellIndex] !== "" || !isGameActive) return;
+            board[cellIndex] = "X";
+            document.querySelectorAll('.ttt-cell')[cellIndex].innerText = "X";
+            document.querySelectorAll('.ttt-cell')[cellIndex].classList.add('X');
+            
+            if(checkTTTWinner("X")) {
+                document.getElementById('ttt-status').innerText = "Fani Kazandı! (X)";
+                isGameActive = false;
+                return;
+            }
+            if(!board.includes("")) {
+                document.getElementById('ttt-status').innerText = "Berabere! Beraberlik rünü.";
+                isGameActive = false;
+                return;
+            }
+            
+            // Lich Bot Hamlesi
+            document.getElementById('ttt-status').innerText = "Lich düşünüyor...";
+            setTimeout(() => {
+                let empties = [];
+                board.forEach((val, index) => { if(val === "") empties.push(index); });
+                if(empties.length > 0 && isGameActive) {
+                    let botMove = empties[Math.floor(Math.random() * empties.length)];
+                    board[botMove] = "O";
+                    document.querySelectorAll('.ttt-cell')[botMove].innerText = "O";
+                    document.querySelectorAll('.ttt-cell')[botMove].classList.add('O');
+                    
+                    if(checkTTTWinner("O")) {
+                        document.getElementById('ttt-status').innerText = "Lich Kazandı! (O)";
+                        isGameActive = false;
+                    } else {
+                        document.getElementById('ttt-status').innerText = "Senin Sıran (X)";
+                    }
+                }
+            }, 400);
+        }
+        function checkTTTWinner(player) {
+            const winPatterns = [
+                [0,1,2], [3,4,5], [6,7,8],
+                [0,3,6], [1,4,7], [2,5,8],
+                [0,4,8], [2,4,6]
+            ];
+            return winPatterns.some(pattern => {
+                return pattern.every(index => board[index] === player);
+            });
+        }
+        function resetTTT() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            isGameActive = true;
+            document.getElementById('ttt-status').innerText = "Senin Sıran (X)";
+            document.querySelectorAll('.ttt-cell').forEach(cell => {
+                cell.innerText = "";
+                cell.className = "ttt-cell";
+            });
+        }
+    </script>
+</body>
+</html>
+"""
+
+# HTML Bileşenini ekrana basıyoruz (Mobil container tasarımı için height ayarı yüksek tutuldu)
+components.html(html_kodu, height=880, scrolling=False)
