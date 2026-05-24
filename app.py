@@ -50,6 +50,8 @@ html_kodu = """
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+    </html>
+"""  # <--- HTML kodunun bittiği en alt satıra bu üçlü tırnağı eklemelisin!
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lich AI</title>
