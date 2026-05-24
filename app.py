@@ -1,5 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import requests
+import json
 
 # Sayfanın geniş açıyla güzel görünmesi için
 st.set_page_config(
@@ -7,6 +9,41 @@ st.set_page_config(
     page_icon="🔮",
     layout="wide"
 )
+
+# ================= STREAMLIT ARKAPLAN GEMINI İLETİŞİM MEKANİZMASI =================
+# HTML'den gelen verileri yakalamak ve Gemini API'sine istek atmak için sorgu parametrelerini kullanıyoruz.
+query_params = st.query_params
+
+if "action" in query_params and query_params["action"] == "gemini_request":
+    user_message = query_params.get("message", "")
+    api_key = query_params.get("key", "")
+    
+    if api_key and user_message:
+        try:
+            # Gemini API Endpoint ve resmi HTTP POST İsteği
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+            headers = {'Content-Type': 'application/json'}
+            payload = {
+                "contents": [{
+                    "parts": [{"text": user_message}]
+                }]
+            }
+            
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            
+            if response.status_code == 200:
+                result = response.json()
+                # Gelen cevaptan sadece metin kısmını ayıklıyoruz
+                bot_response = result['candidates'][0]['content']['parts'][0]['text']
+                st.write(f"|||SUCCESS|||{bot_response}")
+            else:
+                st.write(f"|||ERROR|||Hata Kodu: {response.status_code}. Lütfen API anahtarınızı kontrol edin.")
+        except Exception as e:
+            st.write(f"|||ERROR|||Bağlantı hatası oluştu: {str(e)}")
+    else:
+        st.write("|||ERROR|||Mesaj veya API anahtarı eksik.")
+    st.stop()
+
 
 # Bilgisayarındaki tüm kodları bu tek HTML yapısının içine yerleştiriyoruz
 html_kodu = """
@@ -246,22 +283,23 @@ html_kodu = """
         .hide { display: none !important; }
 
         .chat-panel { flex: 1; display: flex; flex-direction: column; min-height: 200px; }
-        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; padding-right: 4px; }
         .chat-placeholder { margin: auto; text-align: center; padding: 20px; }
         .big-icon { font-size: 45px; color: var(--text-muted); margin-bottom: 10px; }
         .chat-placeholder h3 { font-size: 16px; margin-bottom: 5px; }
         .chat-placeholder p { font-size: 12px; color: var(--text-muted); }
 
         .message { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-break: break-word; }
-        .user-message { background-color: var(--main-color); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .user-message { background-color: var(--main-color); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(var(--main-color-rgb), 0.2); }
         .lich-message { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .loading-message { opacity: 0.6; font-style: italic; }
+        .loading-message { opacity: 0.6; font-style: italic; background-color: transparent; border: none; align-self: flex-start; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
 
         .chat-input-area { display: flex; gap: 8px; align-items: center; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 16px; }
         .chat-input-area input { flex: 1; background: transparent; border: none; color: white; font-size: 14px; outline: none; }
-        .clear-chat-btn, .send-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+        .clear-chat-btn, .send-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; transition: background 0.2s, color 0.2s; }
         .clear-chat-btn:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
         .send-btn { color: var(--main-color); }
+        .send-btn:hover { background-color: rgba(var(--main-color-rgb), 0.1); }
 
         /* ================= OYUNLAR SOKAĞI ================= */
         .games-grid { display: flex; flex-direction: column; gap: 12px; }
@@ -476,7 +514,7 @@ html_kodu = """
                 <h2>Sayı Tahmin Oyunu</h2>
             </div>
             <div class="subpage-content center-content">
-                <p class="game-info-text">1 ile 100 arasında gizli bir sayı tuttun. Tahmin et!</p>
+                <p class="game-info-text">1 ile 100 arasında gizli bir sayı tuttum. Tahmin et!</p>
                 <div class="guess-row">
                     <input type="number" id="guess-input" placeholder="Sayı..." min="1" max="100" />
                     <button class="action-btn" onclick="checkGuess()">Tahmin Et</button>
@@ -523,19 +561,19 @@ html_kodu = """
                 <div class="settings-group">
                     <h3>Görsel Tema Seçimi</h3>
                     <div class="theme-grid">
-                        <div class="theme-select-card active" onclick="setTheme('lich', 'Mistik Lich', this)">
+                        <div class="theme-select-card active" id="ts-lich" onclick="setTheme('lich', 'Mistik Lich', this)">
                             <div class="theme-dot color-lich"></div> <span>Mistik Lich</span>
                         </div>
-                        <div class="theme-select-card" onclick="setTheme('lev', 'Alev', this)">
+                        <div class="theme-select-card" id="ts-lev" onclick="setTheme('lev', 'Alev', this)">
                             <div class="theme-dot color-lev"></div> <span>Alev</span>
                         </div>
-                        <div class="theme-select-card" onclick="setTheme('okyanus', 'Okyanus', this)">
+                        <div class="theme-select-card" id="ts-okyanus" onclick="setTheme('okyanus', 'Okyanus', this)">
                             <div class="theme-dot color-okyanus"></div> <span>Okyanus</span>
                         </div>
-                        <div class="theme-select-card" onclick="setTheme('orman', 'Orman', this)">
+                        <div class="theme-select-card" id="ts-orman" onclick="setTheme('orman', 'Orman', this)">
                             <div class="theme-dot color-orman"></div> <span>Orman</span>
                         </div>
-                        <div class="theme-select-card" onclick="setTheme('kozmik', 'Kozmik', this)">
+                        <div class="theme-select-card" id="ts-kozmik" onclick="setTheme('kozmik', 'Kozmik', this)">
                             <div class="theme-dot color-kozmik"></div> <span>Kozmik</span>
                         </div>
                     </div>
@@ -634,382 +672,129 @@ html_kodu = """
                 card.classList.remove('active');
             });
             if(element) element.classList.add('active');
+            localStorage.setItem('lich_theme', themeClass);
         }
 
-        // ==================== API KEY YÖNETİM MOTORU ====================
-        let GEMINI_API_KEY = ""; 
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedKey = localStorage.getItem('lich_api_key');
-            if (savedKey) {
-                GEMINI_API_KEY = savedKey;
+        // ================= REALTIME SOHBET VE GEMINI SISTEMI =================
+        function updateApiStatus() {
+            const key = localStorage.getItem('lich_api_key');
+            const badge = document.getElementById('api-status-badge');
+            const apiPanel = document.getElementById('api-key-panel');
+            const chatPanel = document.getElementById('chat-panel');
+            
+            if(key) {
+                if(badge) { badge.textContent = 'Aktif'; badge.className = 'badge green'; }
+                if(apiPanel) apiPanel.classList.add('hide');
+                if(chatPanel) chatPanel.classList.remove('hide');
+            } else {
+                if(badge) { badge.textContent = 'Yok'; badge.className = 'badge red'; }
+                if(apiPanel) apiPanel.classList.remove('hide');
+                if(chatPanel) chatPanel.classList.add('hide');
             }
-            updateApiUIState();
-            loadNotes();
-            resetGuessGame();
-        });
+        }
 
         function saveApiKey() {
-            const inputEl = document.getElementById('api-key-input');
-            if (!inputEl) return;
-            
-            const key = inputEl.value.trim();
-            if(key === "") {
-                alert("Lütfen geçerli bir API Anahtarı girin!");
-                return;
-            }
-
-            localStorage.setItem('lich_api_key', key);
-            GEMINI_API_KEY = key;
-            updateApiUIState();
-            inputEl.value = "";
-        }
-
-        function deleteApiKey() {
-            if(confirm("API Anahtarını silmek istediğinize emin misiniz?")) {
-                localStorage.removeItem('lich_api_key');
-                GEMINI_API_KEY = "";
-                updateApiUIState();
-                alert("API Anahtarı başarıyla temizlendi.");
-            }
-        }
-
-        function updateApiUIState() {
-            const keyPanel = document.getElementById('api-key-panel');
-            const chatPanel = document.getElementById('chat-panel');
-            const statusBadge = document.getElementById('api-status-badge');
-
-            if(GEMINI_API_KEY && GEMINI_API_KEY !== "") {
-                if(keyPanel) keyPanel.classList.add('hide');
-                if(chatPanel) chatPanel.classList.remove('hide');
-                if(statusBadge) {
-                    statusBadge.innerText = "Aktif";
-                    statusBadge.className = "badge green";
-                }
-            } else {
-                if(keyPanel) keyPanel.classList.remove('hide');
-                if(chatPanel) chatPanel.classList.add('hide');
-                if(statusBadge) {
-                    statusBadge.innerText = "Yok";
-                    statusBadge.className = "badge red";
-                }
-            }
-        }
-
-        // ================= GEMINI API BAĞLANTISI VE SOHBET MOTORU =================
-        async function sendMessage() {
-            const inputEl = document.getElementById('chat-input');
-            if(!inputEl) return;
-
-            const messageText = inputEl.value.trim();
-            if(messageText === "") return;
-
-            appendMessageToChat('user', messageText);
-            inputEl.value = "";
-
-            const loadingId = appendMessageToChat('lich', 'Lich düşünceleri topluyor...');
-            const loadingEl = document.getElementById(loadingId);
-            if(loadingEl) loadingEl.classList.add('loading-message');
-
-            const responseText = await fetchGeminiResponse(messageText);
-
-            removeLoadingMessage(loadingId);
-            appendMessageToChat('lich', responseText);
-        }
-
-        async function fetchGeminiResponse(userPrompt) {
-            if(!GEMINI_API_KEY || GEMINI_API_KEY === "") {
-                return "Sistem hatası: API anahtarı bulunamadı. Ayarlar sekmesinden anahtar ekleyin.";
-            }
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-            
-            const requestBody = {
-                contents: [{
-                    parts: [{
-                        text: "Sistem Talimatı: Sen mistik, karanlık ama yardımsever bir yapay zeka varlığısın. Adın 'Lich'. Yanıtların çok uzun olmasın, gizemli ve bilge bir üslup kullan.\\n\\nKullanıcı Mesajı: " + userPrompt
-                    }]
-                }]
-            };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if(!response.ok) {
-                    return "Karanlık güçler (API Hatası) yanıt vermemi engelledi. Anahtarınızı kontrol edin.";
-                }
-
-                const data = await response.json();
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    return data.candidates[0].content.parts[0].text;
-                } else {
-                    return "Lich'ten boş bir yanıt döndü.";
-                }
-            } catch (error) {
-                return "Google sunucularına bağlanırken ağ hatası oluştu.";
-            }
-        }
-
-        function appendMessageToChat(sender, text) {
-            const chatMessagesContainer = document.getElementById('chat-messages');
-            if (!chatMessagesContainer) return null;
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            messageDiv.innerText = text;
-
-            const uniqueId = 'msg-' + Date.now();
-            messageDiv.id = uniqueId;
-
-            chatMessagesContainer.appendChild(messageDiv);
-            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-
-            return uniqueId;
-        }
-
-        function removeLoadingMessage(id) {
-            const element = document.getElementById(id);
-            if (element) element.remove();
-        }
-
-        function clearChat() {
-            const chatMessagesContainer = document.getElementById('chat-messages');
-            if (!chatMessagesContainer) return;
-
-            if(confirm("Sohbet geçmişini silmek istiyor musunuz?")) {
-                chatMessagesContainer.innerHTML = `
-                    <div class="chat-placeholder">
-                        <div class="big-icon"><i class="fa-solid fa-ghost"></i></div>
-                        <h3>Benim adım Lich</h3>
-                        <p>Sana nasıl yardımcı olabilirim? Aşağıdan mesaj atabilirsin.</p>
-                    </div>
-                `;
-            }
-        }
-
-        // ================= OYUNLAR MEKANİĞİ =================
-        let tttBoard = ["", "", "", "", "", "", "", "", ""];
-        let tttActive = true;
-
-        function handleTTTClick(index) {
-            const cell = document.querySelector(`.ttt-cell[data-index='${index}']`);
-            if(tttBoard[index] !== "" || !tttActive) return;
-
-            tttBoard[index] = "X";
-            cell.innerText = "X";
-            cell.classList.add("X");
-
-            if(checkTTTWinner("X")) {
-                document.getElementById('ttt-status').innerText = "Tebrikler, Kazandın! 🎉";
-                tttActive = false;
-                return;
-            }
-
-            if(!tttBoard.includes("")) {
-                document.getElementById('ttt-status').innerText = "Berabere! 🤝";
-                tttActive = false;
-                return;
-            }
-
-            tttActive = false;
-            document.getElementById('ttt-status').innerText = "Lich düşünüyor...";
-            setTimeout(() => { makeBotMove(); }, 600);
-        }
-
-        function makeBotMove() {
-            let emptyCells = [];
-            for(let i=0; i<tttBoard.length; i++) {
-                if(tttBoard[i] === "") emptyCells.push(i);
-            }
-
-            if(emptyCells.length > 0) {
-                const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                tttBoard[randomIndex] = "O";
-                const cell = document.querySelector(`.ttt-cell[data-index='${randomIndex}']`);
-                if(cell) {
-                    cell.innerText = "O";
-                    cell.classList.add("O");
-                }
-
-                if(checkTTTWinner("O")) {
-                    document.getElementById('ttt-status').innerText = "Lich kazandı! 💀";
-                    tttActive = false;
-                    return;
-                }
-            }
-
-            if(!tttBoard.includes("") && tttActive) {
-                document.getElementById('ttt-status').innerText = "Berabere! 🤝";
-                tttActive = false;
-                return;
-            }
-
-            tttActive = true;
-            document.getElementById('ttt-status').innerText = "Sıra Sende (X)";
-        }
-
-        function checkTTTWinner(player) {
-            const winPatterns = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
-            return winPatterns.some(pattern => pattern.every(idx => tttBoard[idx] === player));
-        }
-
-        // Düzeltme: Eksik kalan resetTTT fonksiyonu eklendi
-        function resetTTT() {
-            tttBoard = ["", "", "", "", "", "", "", "", ""];
-            tttActive = true;
-            document.getElementById('ttt-status').innerText = "Sıra Sende (X)";
-            document.querySelectorAll('.ttt-cell').forEach(cell => { cell.innerText = ""; cell.className = "ttt-cell"; });
-        }
-
-        let secretBgNumber = 0;
-        function resetGuessGame() {
-            secretBgNumber = Math.floor(Math.random() * 100) + 1;
-            const feedback = document.getElementById('guess-feedback');
-            if(feedback) feedback.innerText = "İlk tahminini bekliyorum...";
-            const input = document.getElementById('guess-input');
-            if(input) input.value = "";
-        }
-
-        function checkGuess() {
-            const inputEl = document.getElementById('guess-input');
-            const feedbackEl = document.getElementById('guess-feedback');
-            if(!inputEl || !feedbackEl) return;
-
-            const currentGuess = parseInt(inputEl.value);
-            if(isNaN(currentGuess) || currentGuess < 1 || currentGuess > 100) {
-                feedbackEl.innerText = "Lütfen 1 ile 100 arasında bir sayı girin!";
-                return;
-            }
-
-            if(currentGuess === secretBgNumber) {
-                feedbackEl.innerText = `Mükemmel! Doğru Sayı: ${secretBgNumber} 🎉`;
-            } else if(currentGuess > secretBgNumber) {
-                feedbackEl.innerText = "Daha KÜÇÜK bir sayı dene! ⬇️";
-            } else {
-                feedbackEl.innerText = "Daha BÜYÜK bir sayı dene! ⬆️";
-            }
-        }
-
-        let userScoreTKM = 0;
-        let botScoreTKM = 0;
-        function playTKM(userSelection) {
-            const options = ['tas', 'kagit', 'makas'];
-            const botSelection = options[Math.floor(Math.random() * 3)];
-            const feedbackEl = document.getElementById('tkm-feedback');
-            const emojiMap = { 'tas': '🪨 Taş', 'kagit': '📄 Kağıt', 'makas': '✂️ Makas' };
-
-            if(userSelection === botSelection) {
-                feedbackEl.innerText = `İki taraf da ${emojiMap[userSelection]} seçti. Berabere!`;
-            } else if((userSelection === 'tas' && botSelection === 'makas') || (userSelection === 'kagit' && botSelection === 'tas') || (userSelection === 'makas' && botSelection === 'kagit')) {
-                userScoreTKM++;
-                feedbackEl.innerText = `Sen: ${emojiMap[userSelection]} | Lich: ${emojiMap[botSelection]}\\nKazandın! 🔥`;
-            } else {
-                botScoreTKM++;
-                feedbackEl.innerText = `Sen: ${emojiMap[userSelection]} | Lich: ${emojiMap[botSelection]}\\nLich vurdu ve gol oldu! 💀`;
-            }
-            document.getElementById('tkm-user-score').innerText = userScoreTKM;
-            document.getElementById('tkm-bot-score').innerText = botScoreTKM;
-        }
-
-        // ================= KİŞİSEL NOTLAR MOTORU =================
-        function addNote() {
-            const txtArea = document.getElementById('note-textarea');
-            if(!txtArea) return;
-            const text = txtArea.value.trim();
-            if(text === "") return;
-
-            let existingNotes = JSON.parse(localStorage.getItem('lich_notes') || "[]");
-            existingNotes.push({ id: Date.now(), content: text });
-            localStorage.setItem('lich_notes', JSON.stringify(existingNotes));
-            txtArea.value = "";
-            loadNotes();
-        }
-
-        // Düzeltme: Eksik kalan deleteNote fonksiyonu eklendi
-        function deleteNote(id) {
-            let existingNotes = JSON.parse(localStorage.getItem('lich_notes') || "[]");
-            existingNotes = existingNotes.filter(n => n.id !== id);
-            localStorage.setItem('lich_notes', JSON.stringify(existingNotes));
-            loadNotes();
-        }
-
-        function loadNotes() {
-            const notesListContainer = document.getElementById('notes-list');
-            if(!notesListContainer) return;
-            notesListContainer.innerHTML = "";
-            const notes = JSON.parse(localStorage.getItem('lich_notes') || "[]");
-
-            if(notes.length === 0) {
-                notesListContainer.innerHTML = "<p style='font-size:12px;color:var(--text-muted);text-align:center;'>Kayıtlı notunuz bulunmuyor.</p>";
-                return;
-            }
-            notes.forEach(note => {
-                const item = document.createElement('div');
-                item.className = "note-item";
-                item.innerHTML = `
-                    <div class="note-text">${note.content}</div>
-                    <button class="delete-note-btn" onclick="deleteNote(${note.id})"><i class="fa-solid fa-trash"></i></button>
-                `;
-                notesListContainer.appendChild(item);
-            });
-        }
-
-        // ================= LICH ANIMASYONU VE ETKİLEŞİM MEKANİZMASI =================
-        document.addEventListener('DOMContentLoaded', () => {
-            const ghost = document.getElementById('lichGhost');
-            const eyes = document.getElementById('ghostEyes');
-
-            if (!ghost || !eyes) return;
-
-            document.addEventListener('mousemove', (e) => {
-                if (!document.getElementById('page-sohbet').classList.contains('active')) return;
-
-                const rect = ghost.getBoundingClientRect();
-                const ghostX = rect.left + rect.width / 2;
-                const ghostY = rect.top + rect.height / 2;
-                const angle = Math.atan2(e.clientY - ghostY, e.clientX - ghostX);
-                
-                const distance = 3; 
-                const moveX = Math.cos(angle) * distance;
-                const moveY = Math.sin(angle) * distance;
-
-                eyes.style.transform = `translate(${moveX}px, ${moveY}px)`;
-            });
-
-            setInterval(() => {
-                if (!document.getElementById('page-sohbet').classList.contains('active')) return;
-                if (Math.random() > 0.6) {
-                    ghost.classList.add('spook-action');
-                    setTimeout(() => ghost.classList.remove('spook-action'), 500);
-                }
-            }, 5000);
-        });
-
-        function openLichChat() {
-            const chatInput = document.getElementById('chat-input');
-            const apiKeyPanel = document.getElementById('api-key-panel');
-            const ghost = document.getElementById('lichGhost');
-
-            if (ghost) {
+            const input = document.getElementById('api-key-input');
+            const key = input.value.trim();
+            if(key) {
+                localStorage.setItem('lich_api_key', key);
+                updateApiStatus();
+                input.value = '';
+                // Hayalete korkutma animasyonu tetikle
+                const ghost = document.getElementById('lichGhost');
                 ghost.classList.add('spook-action');
                 setTimeout(() => ghost.classList.remove('spook-action'), 500);
             }
+        }
 
-            if (apiKeyPanel && apiKeyPanel.classList.contains('hide')) {
-                if (chatInput) chatInput.focus();
-            } else {
-                const inputKey = document.getElementById('api-key-input');
-                if (inputKey) inputKey.focus();
+        function deleteApiKey() {
+            localStorage.removeItem('lich_api_key');
+            updateApiStatus();
+            clearChat();
+        }
+
+        function openLichChat() {
+            const key = localStorage.getItem('lich_api_key');
+            if(key) {
+                document.getElementById('api-key-panel').classList.add('hide');
+                document.getElementById('chat-panel').classList.remove('hide');
             }
         }
-    </script>
-</body>
-</html>
-"""
 
-# Streamlit uygulamasında kilitlenmeleri önlemek ve tam sığması için height parametresini 800 yapıyoruz
-components.html(html_kodu, height=800, scrolling=True)
+        function clearChat() {
+            const msgArea = document.getElementById('chat-messages');
+            msgArea.innerHTML = `
+                <div class="chat-placeholder">
+                    <div class="big-icon"><i class="fa-solid fa-ghost"></i></div>
+                    <h3>Benim adım Lich</h3>
+                    <p>Sana nasıl yardımcı olabilirim? Aşağıdan mesaj atabilirsin.</p>
+                </div>
+            `;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            const apiKey = localStorage.getItem('lich_api_key');
+            
+            if(!message || !apiKey) return;
+            
+            const msgArea = document.getElementById('chat-messages');
+            
+            // Placeholder'ı temizle (İlk mesajda)
+            const placeholder = msgArea.querySelector('.chat-placeholder');
+            if(placeholder) placeholder.remove();
+            
+            // Kullanıcı mesajını ekle
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message user-message';
+            userDiv.textContent = message;
+            msgArea.appendChild(userDiv);
+            
+            input.value = '';
+            msgArea.scrollTop = msgArea.scrollHeight;
+            
+            // Lich yükleniyor mesajını ekle
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message loading-message';
+            loadingDiv.id = 'lich-loading-temp';
+            loadingDiv.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Lich düşünüyor...`;
+            msgArea.appendChild(loadingDiv);
+            msgArea.scrollTop = msgArea.scrollHeight;
+            
+            // Streamlit arkadaki Gemini python yapısına AJAX (Fetch) ile asenkron istek atma
+            const currentUrl = window.location.origin + window.location.pathname;
+            const targetUrl = `${currentUrl}?action=gemini_request&message=${encodeURIComponent(message)}&key=${encodeURIComponent(apiKey)}`;
+            
+            fetch(targetUrl)
+                .then(res => res.text())
+                .then(data => {
+                    // Yükleniyor yazısını kaldır
+                    const temp = document.getElementById('lich-loading-temp');
+                    if(temp) temp.remove();
+                    
+                    const lichDiv = document.createElement('div');
+                    lichDiv.className = 'message lich-message';
+                    
+                    if(data.includes("|||SUCCESS|||")) {
+                        lichDiv.textContent = data.replace("|||SUCCESS|||", "").trim();
+                    } else if(data.includes("|||ERROR|||")) {
+                        lichDiv.textContent = data.replace("|||ERROR|||", "").trim();
+                        lichDiv.style.borderColor = "#ef4444";
+                    } else {
+                        lichDiv.textContent = "Bir hata oluştu veya geçersiz yanıt alındı.";
+                    }
+                    
+                    msgArea.appendChild(lichDiv);
+                    msgArea.scrollTop = msgArea.scrollHeight;
+                })
+                .catch(err => {
+                    const temp = document.getElementById('lich-loading-temp');
+                    if(temp) temp.remove();
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'message lich-message';
+                    errorDiv.style.borderColor = "#ef4444";
+                    errorDiv.textContent = "Bağlantı hatası: Sunucuya ulaşılamadı.";
+                    msgArea.appendChild(errorDiv);
+                    msgArea.scrollTop = msgArea.scrollHeight;
