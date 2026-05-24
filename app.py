@@ -105,7 +105,7 @@ html_kodu = """
         .page-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
@@ -120,6 +120,27 @@ html_kodu = """
             gap: 8px;
             color: var(--main-color);
             text-shadow: 0 0 15px rgba(var(--main-color-rgb), 0.3);
+        }
+
+        /* Soru İşareti Yardım Kutucuğu */
+        .help-icon-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .help-icon-btn:hover {
+            color: var(--main-color);
+            border-color: var(--main-color);
+            box-shadow: 0 0 8px rgba(var(--main-color-rgb), 0.4);
         }
 
         /* ================= LICH HAYALETI VE YENI SOHBET BUTONU ================= */
@@ -166,4 +187,183 @@ html_kodu = """
             background: rgba(var(--main-color-rgb), 0.08);
             border: 1px solid rgba(var(--main-color-rgb), 0.25);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur
+            -webkit-backdrop-filter: blur(8px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            color: var(--text-main);
+            font-size: 13px;
+            max-width: 85%;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            animation: bubblePulse 2.5s infinite ease-in-out;
+            transition: transform 0.2s;
+        }
+        .lich-chat-bubble:hover { transform: translateY(-2px); background: rgba(var(--main-color-rgb), 0.15); }
+
+        .bubble-arrow {
+            position: absolute;
+            top: -8px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-bottom: 8px solid rgba(var(--main-color-rgb), 0.25);
+        }
+
+        /* YENİDEN TASARLANAN YALNIZCA SOHBET BUTONLU API ALANI */
+        .api-key-panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            margin-top: 15px;
+        }
+        .api-panel-content p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+        .api-input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .api-input {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .api-input:focus { border-color: var(--main-color); }
+
+        .api-save-btn {
+            width: 100%;
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(var(--main-color-rgb), 0.3);
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .api-save-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+        .api-hint { font-size: 11px !important; color: var(--text-muted); text-align: center; margin-top: 5px; }
+
+        /* Yeni Eklenen Mini Google AI Studio Bağlantı Paneli */
+        .mini-help-panel {
+            margin-top: 15px;
+            background: rgba(var(--main-color-rgb), 0.04);
+            border: 1px solid rgba(var(--main-color-rgb), 0.15);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .mini-help-panel span {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 8px;
+        }
+        .ai-studio-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--main-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .ai-studio-btn:hover {
+            border-color: var(--main-color);
+            background: rgba(var(--main-color-rgb), 0.08);
+        }
+
+        /* ================= CHAT GÖRÜNÜMÜ ================= */
+        .hide { display: none !important; }
+
+        .chat-panel { flex: 1; display: flex; flex-direction: column; min-height: 200px; }
+        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+        .chat-placeholder { margin: auto; text-align: center; padding: 20px; }
+        .big-icon { font-size: 45px; color: var(--text-muted); margin-bottom: 10px; }
+        .chat-placeholder h3 { font-size: 16px; margin-bottom: 5px; }
+        .chat-placeholder p { font-size: 12px; color: var(--text-muted); }
+
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-break: break-word; }
+        .user-message { background-color: var(--main-color); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .lich-message { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .loading-message { opacity: 0.6; font-style: italic; }
+
+        .chat-input-area { display: flex; gap: 8px; align-items: center; background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 16px; }
+        .chat-input-area input { flex: 1; background: transparent; border: none; color: white; font-size: 14px; outline: none; }
+        .clear-chat-btn, .send-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+        .clear-chat-btn:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+        .send-btn { color: var(--main-color); }
+
+        /* ================= OYUNLAR SOKAĞI ================= */
+        .games-grid { display: flex; flex-direction: column; gap: 12px; }
+        .game-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+        .game-card:hover { transform: translateY(-2px); border-color: var(--main-color); }
+        .game-icon { width: 48px; height: 48px; background-color: var(--bg-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--main-color); font-size: 18px; }
+        .game-details h3 { font-size: 15px; margin-bottom: 2px; }
+        .game-details p { font-size: 12px; color: var(--text-muted); }
+
+        .center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: auto 0; }
+        .back-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; }
+        .game-status { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: var(--main-color); }
+        .game-info-text { font-size: 12.5px; color: var(--text-muted); margin-bottom: 15px; }
+        .game-feedback { font-size: 14px; margin: 14px 0; text-align: center; min-height: 20px; }
+
+        /* XOX Board */
+        .ttt-board { display: grid; grid-template-columns: repeat(3, 85px); grid-template-rows: repeat(3, 85px); gap: 8px; margin-bottom: 20px; }
+        .ttt-cell { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; cursor: pointer; }
+        .ttt-cell.X { color: var(--main-color); }
+        .ttt-cell.O { color: #f43f5e; }
+
+        #guess-input { width: 70px; background-color: var(--bg-card); border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 10px; text-align: center; outline: none; }
+        .guess-row { display: flex; gap: 8px; margin-bottom: 10px; }
+
+        .tkm-score { font-size: 16px; font-weight: bold; margin-bottom: 20px; }
+        .tkm-choices { display: flex; gap: 10px; margin-bottom: 10px; }
+        .tkm-btn { background-color: var(--bg-card); border: 1px solid var(--border-color); color: white; padding: 12px 16px; border-radius: 12px; cursor: pointer; }
+
+        .action-btn { background-color: var(--main-color); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 13.5px; }
+        .outline-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); margin-top: 8px; padding: 6px 12px; font-size: 11px; }
+        .danger-btn { background-color: #ef4444 !important; }
+
+        /* ================= KİŞİSEL NOTLAR ================= */
+        .notlar-container { display: flex; flex-direction: column; gap: 12px; }
+        .note-input-box { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .note-input-box textarea { background: transparent; border: none; color: white; font-size: 14px; resize: none; height: 65px; outline: none; }
+        .notes-list { display: flex; flex-direction: column; gap: 8px; }
+        .note-item { background-color: var(--bg-card); border: 1px solid var(--border-color); border-left: 3px solid var(--main-color); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .note-text { font-size: 13px; line-height: 1.4; white-space: pre-wrap; }
+        .delete-note-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
+
+        /* ================= SİSTEM AYARLARI ================= */
+        .settings-list { display: flex; flex-direction: column; gap: 16px; }
+        .settings-group { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px; }
+        .settings-group h3 { font-size: 13.5px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500; }
+        .theme-grid { display: flex; flex-direction: column; gap: 6px; }
+        .theme-select-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background-color: var(--bg-dark); border: 1px solid var(--border-color); cursor: pointer; }
+        .theme-select-card.active { border-color: var(--main-color); background
