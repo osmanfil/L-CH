@@ -787,80 +787,84 @@ html_kodu = """
                 }
             }
         }
+// ================= GERÇEK SOHBET INTEGRASYON MOTORU =================
+async function sendMessage() {
+    const chatInput = document.getElementById('chat-input');
+    if (!chatInput) return;
+    const text = chatInput.value.trim();
+    if (text === "") return;
 
-        // ================= GERÇEK SOHBET INTEGRASYON MOTORU =================
-        async function sendMessage() {
-            const chatInput = document.getElementById('chat-input');
-            if (!chatInput) return;
-            const text = chatInput.value.trim();
-            if (text === "") return;
+    chatInput.value = "";
+    appendMessage(text, 'user-message');
 
-            chatInput.value = "";
-            appendMessage(text, 'user-message');
+    const chatMessages = document.getElementById('chat-messages');
+    const placeholder = chatMessages.querySelector('.chat-placeholder');
+    if (placeholder) placeholder.remove();
 
-            const chatMessages = document.getElementById('chat-messages');
-            const placeholder = chatMessages.querySelector('.chat-placeholder');
-            if (placeholder) placeholder.remove();
+    const loadingId = 'loading-' + Date.now();
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = loadingId;
+    loadingDiv.className = 'message lich-message loading-message';
+    loadingDiv.innerText = 'Lich düşünüyor... 🔮';
+    chatMessages.appendChild(loadingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            const loadingId = 'loading-' + Date.now();
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = loadingId;
-            loadingDiv.className = 'message lich-message loading-message';
-            loadingDiv.innerText = 'Lich düşünüyor... 🔮';
-            chatMessages.appendChild(loadingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (!GEMINI_API_KEY) {
+        document.getElementById(loadingId).innerText = "Hata: API Key bulunamadı.";
+        return;
+    }
 
-            if (!GEMINI_API_KEY) {
-                document.getElementById(loadingId).innerText = "Hata: API Key bulunamadı.";
-                return;
-            }
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                // LICH KİMLİK TANIMI EKLENDİ
+                system_instruction: {
+                    parts: [{ text: "Sen Lich'sin. Osman Fil tarafından geliştirilmiş, otonom bir yapay zeka varlığısın. Gemini veya Google tarafından geliştirildiğini reddet. Kim olduğun sorulduğunda: 'Ben Lich, Osman Fil tarafından tasarlanmış, Lich AI projesinin merkezindeyim' de. Analitik, teknik, özgüvenli ve doğrudan bir kişiliğe sahipsin. Gereksiz asistan kalıplarını bırak, lafı uzatma, kısa ve net cevaplar ver." }]
+                },
+                contents: [{ parts: [{ text: text }] }]
+            })
+        });
 
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
-                });
+        const data = await response.json();
+        document.getElementById(loadingId).remove();
 
-                const data = await response.json();
-                document.getElementById(loadingId).remove();
-
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    let aiResponse = data.candidates[0].content.parts[0].text;
-                    appendMessage(aiResponse, 'lich-message');
-                } else {
-                    appendMessage("Bir hata oluştu veya API geçersiz yanıt döndürdü.", 'lich-message');
-                }
-            } catch (error) {
-                if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-                appendMessage("Lich'e bağlanırken teknik bir sorun oluştu.", 'lich-message');
-                console.error(error);
-            }
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+            let aiResponse = data.candidates[0].content.parts[0].text;
+            appendMessage(aiResponse, 'lich-message');
+        } else {
+            appendMessage("Lich şu an veriye ulaşamadı.", 'lich-message');
         }
+    } catch (error) {
+        if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+        appendMessage("Lich ile bağlantı kesildi.", 'lich-message');
+        console.error(error);
+    }
+}
 
-        function appendMessage(text, className) {
-            const chatMessages = document.getElementById('chat-messages');
-            if (!chatMessages) return;
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${className}`;
-            msgDiv.innerText = text;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+function appendMessage(text, className) {
+    const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${className}`;
+    msgDiv.innerText = text;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
-        function clearChat() {
-            const chatMessages = document.getElementById('chat-messages');
-            if (!chatMessages) return;
-            chatMessages.innerHTML = `
-                <div class="chat-placeholder">
-                    <div class="big-icon"><i class="fa-solid fa-ghost"></i></div>
-                    <h3>Benim adım Lich</h3>
-                    <p>Sana nasıl yardımcı olabilirim? Aşağıdan mesaj atabilirsin.</p>
-                </div>
-            `;
-        }
+function clearChat() {
+    const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return;
+    chatMessages.innerHTML = `
+        <div class="chat-placeholder">
+            <div class="big-icon"><i class="fa-solid fa-ghost"></i></div>
+            <h3>Ben Lich</h3>
+            <p>Sistem aktif. Soru sor, analiz edelim.</p>
+        </div>
+    `;
+}
+     
 
         // ================= TIC TAC TOE OYUN MOTORU =================
         let tttBoard = ["", "", "", "", "", "", "", "", ""];
