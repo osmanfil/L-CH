@@ -651,7 +651,7 @@ html_kodu = """
                             • Google AI Studio entegrasyonu tamamlandı.<br>
                             • Kullanıcı dostu hızlı API Key alma arayüzü eklendi.<br>
                             • Gereksiz asistan nezaketleri kaldırıldı. Lich artık seninle doğrudan ve kararlı bir şekilde iletişime geçiyor.
-                            • Not: Lich'in bilinci, Osman Fil tarafından sürekli güncellenen ve geliştirilen bir yapıdır.
+                            • Lich'in bilinci, Osman Fil tarafından sürekli güncellenen ve geliştirilen bir yapıdır.
                         </div>
                     </div>
 
